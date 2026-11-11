@@ -9,7 +9,9 @@ A small web app where a diabetes patient records up to 4 blood glucose readings 
 - Add, view, edit and delete readings (4 slots: Morning (fasting), After breakfast, After lunch, After dinner)
 - Validation with clear messages in the UI (required, 40–600 whole number, one per slot per day, max 4 per day, no future dates)
 - Reports: Daily (with each reading), Month-to-date, Previous month – highest, lowest, average (1 decimal), count, friendly empty state
-- Bonus done: pagination on `GET /api/readings`, `docker-compose.yml` for PostgreSQL
+- Line chart (Recharts) of the month's readings on the Month-to-date and Previous month reports, one line per time slot
+- Login/register are rate-limited (30 requests per 15 minutes per IP) to slow down password guessing
+- Bonus done: pagination on `GET /api/readings`, `docker-compose.yml` for PostgreSQL, line chart, React Testing Library tests
 
 ## Prerequisites
 Node.js 20+ and either Docker **or** a local PostgreSQL 14+.
@@ -44,9 +46,11 @@ cd client && npm run dev
 
 ## Tests
 ```bash
-cd server && npm test
+cd server && npm test     # 23 backend tests (Node's built-in test runner)
+cd client && npm test     # 10 frontend tests (Vitest + React Testing Library)
 ```
-Covers the validation rules, report date ranges (incl. January and leap-year February) and the statistics maths.
+- **Backend:** validation rules, registration validation, duplicate-slot message, report date ranges (incl. January and leap-year February), statistics maths and the rate limiter.
+- **Frontend:** the reading form (add, edit, cancel, and the error messages returned by the server) and the chart data helper.
 
 ## API
 | Method | Path | Notes |
@@ -57,9 +61,9 @@ Covers the validation rules, report date ranges (incl. January and leap-year Feb
 | POST | `/api/readings` | `{date, slot, value}` |
 | PUT | `/api/readings/:id` | same body |
 | DELETE | `/api/readings/:id` | |
-| GET | `/api/reports/daily \| month-to-date \| monthly?date=YYYY-MM-DD` | |
+| GET | `/api/reports/daily \| month-to-date \| monthly?date=YYYY-MM-DD` | `{type, from, to, stats, readings}` |
 
-Slots: `morning`, `after_breakfast`, `after_lunch`, `after_dinner`. Send `Authorization: Bearer <token>`.
+Slots: `morning`, `after_breakfast`, `after_lunch`, `after_dinner`. Send `Authorization: Bearer <token>`. The auth routes answer `429` with a `Retry-After` header after too many attempts.
 
 ## Notes
 **Assumptions**
@@ -68,9 +72,11 @@ Slots: `morning`, `after_breakfast`, `after_lunch`, `after_dinner`. Send `Author
 - Max-4 is checked before the duplicate-slot rule, so a full day always shows the "4 readings" message.
 - Report dates in the future are rejected.
 - Editing a reading can change its slot and value; the date stays the same.
+- The chart shows one line per time slot, with the day of the month on the horizontal axis.
+- The rate limiter keeps its counters in memory, which is fine for one server; a shared store such as Redis would be needed to run several instances.
 - Passwords must be at least 8 characters. `bcryptjs` is used (same algorithm as `bcrypt`, no native build step).
 
 **With more time**
-- API integration tests (supertest + a test database) and React Testing Library tests for the form
-- Charts (Recharts), Redis caching of reports, refresh tokens / httpOnly cookies, rate limiting on login
+- API integration tests (supertest + a test database)
+- Redis caching of reports, refresh tokens / httpOnly cookies, a shared (Redis) rate-limit store
 - Proper migrations tool (e.g. node-pg-migrate) and a Dockerfile for the app itself
