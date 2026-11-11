@@ -26,9 +26,9 @@ router.get('/:type', async (req, res) => {
   );
   rows.sort((a, b) => a.date.localeCompare(b.date) || SLOT_KEYS.indexOf(a.slot) - SLOT_KEYS.indexOf(b.slot));
 
-  const body = { type, from, to, stats: computeStats(rows.map((r) => r.value)) };
-  if (type === 'daily') body.readings = rows; // daily report also lists each reading
-  res.json(body);
+  // Every report also returns its readings: the daily report lists them and the
+  // month-to-date / monthly reports use them to draw the chart
+  res.json({ type, from, to, stats: computeStats(rows.map((r) => r.value)), readings: rows });
 });
 
 module.exports = router;
