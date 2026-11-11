@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
+import GlucoseChart from './GlucoseChart.jsx';
 import { formatDate, slotLabel } from './utils';
 
 const TABS = [
@@ -52,6 +53,7 @@ export default function Reports({ date, refreshKey }) {
               <Stat label="Readings" value={report.stats.count} unit="" />
             </div>
           )}
+          {type !== 'daily' && report.readings.length > 0 && <GlucoseChart readings={report.readings} />}
           {type === 'daily' && report.readings.length > 0 && (
             <ul className="list">
               {report.readings.map((r) => (

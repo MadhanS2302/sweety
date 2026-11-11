@@ -29,3 +29,6 @@ input, select { padding: 9px 10px; border: 1px solid #d1d5db; border-radius: 8px
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 12px 0; }
 .stat { background: #fdf2f8; border-radius: 10px; padding: 12px; text-align: center; }
 .stat-value { font-size: 26px; font-weight: 700; color: #9d174d; }
+
+.chart { margin-top: 12px; }
+.chart-note { text-align: center; margin: 4px 0 0; font-size: 12px; }
