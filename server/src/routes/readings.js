@@ -1,14 +1,13 @@
 const express = require('express');
 const db = require('../db');
 const auth = require('../middleware/auth');
-const { SLOTS, validateReading } = require('../utils/validators');
+const { validateReading, duplicateMessage } = require('../utils/validators');
 const { isValidDate } = require('../utils/dates');
 
 const router = express.Router();
 router.use(auth); // every route below only touches the logged-in user's data
 
 const COLUMNS = 'id, reading_date AS date, slot, value';
-const duplicateMessage = (slot) => `You already have an ${SLOTS[slot]} reading for this date.`;
 
 // GET /api/readings?date=YYYY-MM-DD&page=1&limit=20
 router.get('/', async (req, res) => {

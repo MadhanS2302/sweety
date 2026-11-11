@@ -8,6 +8,13 @@ const SLOTS = {
 };
 const SLOT_KEYS = Object.keys(SLOTS);
 
+// "a Morning (fasting)" / "an After lunch": pick the article from the first letter
+const withArticle = (label) => `${/^[aeiou]/i.test(label) ? 'an' : 'a'} ${label}`;
+
+function duplicateMessage(slot) {
+  return `You already have ${withArticle(SLOTS[slot])} reading for this date.`;
+}
+
 // Returns an error message string, or null when the reading is valid.
 // (The "one per slot" and "max 4 per day" rules need the database, so they live in the route.)
 function validateReading({ value, date, slot }, today = todayString()) {
@@ -31,4 +38,4 @@ function validateRegistration({ name, email, password }) {
   return null;
 }
 
-module.exports = { SLOTS, SLOT_KEYS, validateReading, validateRegistration };
+module.exports = { SLOTS, SLOT_KEYS, validateReading, validateRegistration, duplicateMessage };
