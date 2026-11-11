@@ -1,13 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const config = require('./config');
+const rateLimit = require('./middleware/rateLimit');
 
 const app = express();
 app.use(cors({ origin: config.clientOrigin }));
 app.use(express.json());
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
-app.use('/api/auth', require('./routes/auth'));
+// Slow down password guessing on login / register
+app.use('/api/auth', rateLimit({ max: 30 }), require('./routes/auth'));
 app.use('/api/readings', require('./routes/readings'));
 app.use('/api/reports', require('./routes/reports'));
 
