@@ -9,6 +9,12 @@ router.use(auth); // every route below only touches the logged-in user's data
 
 const COLUMNS = 'id, reading_date AS date, slot, value';
 
+// Reading ids are SERIAL integers: anything else cannot exist, and would make Postgres throw
+const validId = (req, res, next) => {
+  if (!/^\d{1,9}$/.test(req.params.id)) return res.status(404).json({ error: 'Reading not found.' });
+  next();
+};
+
 // GET /api/readings?date=YYYY-MM-DD&page=1&limit=20
 router.get('/', async (req, res) => {
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
@@ -58,7 +64,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', validId, async (req, res) => {
   const error = validateReading(req.body);
   if (error) return res.status(400).json({ error });
 
@@ -89,7 +95,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', validId, async (req, res) => {
   const result = await db.query('DELETE FROM readings WHERE id = $1 AND user_id = $2', [req.params.id, req.userId]);
   if (!result.rowCount) return res.status(404).json({ error: 'Reading not found.' });
   res.status(204).end();
