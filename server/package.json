@@ -8,7 +8,7 @@
     "migrate": "node src/migrate.js",
     "seed": "node src/seed.js",
     "test": "node --test",
-    "test:api": "node --test tests/api/auth.api.js"
+    "test:api": "node --test tests/api/auth.api.js tests/api/readings.api.js tests/api/reports.api.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
