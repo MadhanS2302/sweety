@@ -46,10 +46,12 @@ cd client && npm run dev
 
 ## Tests
 ```bash
-cd server && npm test     # 23 backend tests (Node's built-in test runner)
+cd server && npm test           # 23 backend unit tests (Node's built-in test runner, no database needed)
+cd server && npm run test:api   # 28 API integration tests (needs the database and .env from the steps above)
 cd client && npm test     # 10 frontend tests (Vitest + React Testing Library)
 ```
 - **Backend:** validation rules, registration validation, duplicate-slot message, report date ranges (incl. January and leap-year February), statistics maths and the rate limiter.
+- **API integration tests:** start the real app against your PostgreSQL database and check sign-up and login, every validation rule, one reading per slot, max 4 per day, editing and deleting, that users cannot see each other's readings, pagination and all three reports. They create users with an `apitest-` e-mail and delete them afterwards, and they are skipped with a message when `.env` is missing.
 - **Frontend:** the reading form (add, edit, cancel, and the error messages returned by the server) and the chart data helper.
 
 ## API
@@ -63,7 +65,7 @@ cd client && npm test     # 10 frontend tests (Vitest + React Testing Library)
 | DELETE | `/api/readings/:id` | |
 | GET | `/api/reports/daily \| month-to-date \| monthly?date=YYYY-MM-DD` | `{type, from, to, stats, readings}` |
 
-Slots: `morning`, `after_breakfast`, `after_lunch`, `after_dinner`. Send `Authorization: Bearer <token>`. The auth routes answer `429` with a `Retry-After` header after too many attempts.
+Slots: `morning`, `after_breakfast`, `after_lunch`, `after_dinner`. Send `Authorization: Bearer <token>`. The auth routes answer `429` with a `Retry-After` header after too many attempts. Invalid JSON answers `400`, a body over 10 kb answers `413`, and a reading id that is not a number answers `404`.
 
 ## Notes
 **Assumptions**
@@ -77,6 +79,6 @@ Slots: `morning`, `after_breakfast`, `after_lunch`, `after_dinner`. Send `Author
 - Passwords must be at least 8 characters. `bcryptjs` is used (same algorithm as `bcrypt`, no native build step).
 
 **With more time**
-- API integration tests (supertest + a test database)
+- Run the API integration tests against a separate test database (today they use the database from `.env` and delete the users they create)
 - Redis caching of reports, refresh tokens / httpOnly cookies, a shared (Redis) rate-limit store
 - Proper migrations tool (e.g. node-pg-migrate) and a Dockerfile for the app itself
